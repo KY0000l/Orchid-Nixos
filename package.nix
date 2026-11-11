@@ -21,8 +21,28 @@ appimageTools.wrapType2 {
   inherit pname version src;
 
   # The AppImage bundles its libraries but uses the host Vulkan loader.
-  extraPkgs = pkgs: [ vulkan-loader ];
-
+  extraPkgs = pkgs: with pkgs; [
+    vulkan-loader
+    libgpg-error
+    libgcrypt
+    libselinux
+    libdrm
+    libGL
+    libxkbcommon
+    wayland
+    alsa-lib
+    libpulseaudio
+    pipewire
+    dbus
+    fontconfig
+    freetype
+    harfbuzz
+    glib
+    zlib
+    openssl
+    systemdLibs
+    stdenv.cc.cc.lib
+  ];
   # Install desktop entry and icons from the AppImage, if it ships them.
   extraInstallCommands = ''
     for desktop in ${appimageContents}/*.desktop; do
