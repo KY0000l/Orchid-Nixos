@@ -118,7 +118,7 @@ in
       version = build;
       src = fetchurl {
         url = "https://github.com/CheezerWheezer/CheezyEmu/releases/download/test-${build}/cheezyemu-linux-x86_64-pgo.AppImage";
-        hash = "sha256-KHxxsa4g/8ORQQ7O8xvlUNe22lyt4zZehqzP+Btu3z8=";
+        hash = "sha256-4S+Y+8HDTdPHncYFkCjVHLi+Z/zQxVxVQCtLWuCJoPg=";
       };
       description = "Experimental Nintendo Switch 2 emulator, CheezyEmu (PGO AppImage build)";
       homepage = "https://github.com/CheezerWheezer/CheezyEmu";
