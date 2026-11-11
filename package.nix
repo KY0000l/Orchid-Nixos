@@ -102,7 +102,7 @@ in
       version = build;
       src = fetchurl {
         url = "https://github.com/zortos293/Lichii/releases/download/build-${build}/lichii-linux-x86_64-pgo.AppImage";
-        hash = "sha256-3xVDMoxEiwfMmHHnDO5EkfUXS0TJg6PjLWIjZA4/lzw=";
+        hash = "sha256-KHxxsa4g/8ORQQ7O8xvlUNe40lyt4zZehqzP+Btu3z8=";
       };
       description = "Experimental Nintendo Switch 2 emulator, Lichii (PGO AppImage build)";
       homepage = "https://github.com/zortos293/Lichii";
