@@ -25,12 +25,16 @@
           type = "app";
           program = "${emulators.lichii}/bin/lichii";
         };
+        cheezyemu = {
+          type = "app";
+          program = "${emulators.cheezyemu}/bin/cheezyemu";
+        };
         default = self.apps.${system}.orchid;
       };
 
       # Adds pkgs.orchid and pkgs.lichii
       overlays.default = final: _prev: {
-        inherit (final.callPackage ./package.nix { }) orchid lichii;
+        inherit (final.callPackage ./package.nix { }) orchid lichii cheezyemu;
       };
     };
 }
