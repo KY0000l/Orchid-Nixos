@@ -108,4 +108,20 @@ in
       homepage = "https://github.com/zortos293/Lichii";
       changelog = "https://github.com/zortos293/Lichii/releases/tag/build-${build}";
     };
+
+  cheezyemu =
+    let
+      build = "c1eecfd";
+    in
+    mkEmulator {
+      pname = "cheezyemu";
+      version = build;
+      src = fetchurl {
+        url = "https://github.com/CheezerWheezer/CheezyEmu/releases/download/test-${build}/cheezyemu-linux-x86_64-pgo.AppImage";
+        hash = "sha256-KHxxsa4g/8ORQQ7O8xvlUNe22lyt4zZehqzP+Btu3z8=";
+      };
+      description = "Experimental Nintendo Switch 2 emulator, CheezyEmu (PGO AppImage build)";
+      homepage = "https://github.com/CheezerWheezer/CheezyEmu";
+      changelog = "https://github.com/zortos293/Lichii/releases/tag/test-${build}";
+    };
 }
