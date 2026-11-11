@@ -1,71 +1,111 @@
+# Provides both emulators as PGO AppImage wrappers:
+#   (callPackage ./package.nix { }).orchid
+#   (callPackage ./package.nix { }).lichii
 {
   lib,
   appimageTools,
   fetchurl,
-  vulkan-loader,
 }:
 
 let
-  pname = "orchid";
-  version = "0.9.3";
+  # Libraries the AppImages expect the host to provide.
+  # If another "cannot open shared object file" error shows up,
+  # find the owner with `nix-locate <file>` and add it here.
+  extraLibs =
+    pkgs: with pkgs; [
+      vulkan-loader
+      libgpg-error
+      libgcrypt
+      libselinux
+      libdrm
+      libGL
+      libxkbcommon
+      wayland
+      alsa-lib
+      libpulseaudio
+      pipewire
+      dbus
+      fontconfig
+      freetype
+      harfbuzz
+      glib
+      zlib
+      openssl
+      systemdLibs
+      stdenv.cc.cc.lib
+    ];
 
-  # PGO (profile-guided optimization) build, the one upstream recommends.
-  src = fetchurl {
-    url = "https://github.com/MythosOfs/Orchid/releases/download/v${version}/orchid-v${version}-linux-x86_64-pgo.AppImage";
-    hash = "sha256-YCrHLIiC7cOgcA9+ZazES0PX07FolhxVCGPE5y3dw+E=";
-  };
+  mkEmulator =
+    {
+      pname,
+      version,
+      src,
+      description,
+      homepage,
+      changelog,
+    }:
+    let
+      appimageContents = appimageTools.extract { inherit pname version src; };
+    in
+    appimageTools.wrapType2 {
+      inherit pname version src;
 
-  appimageContents = appimageTools.extract { inherit pname version src; };
+      extraPkgs = extraLibs;
+
+      # Install desktop entry and icons from the AppImage, if it ships them.
+      extraInstallCommands = ''
+        for desktop in ${appimageContents}/*.desktop; do
+          [ -e "$desktop" ] || continue
+          install -Dm444 "$desktop" "$out/share/applications/$(basename "$desktop")"
+          substituteInPlace "$out/share/applications/$(basename "$desktop")" \
+            --replace-quiet "Exec=AppRun" "Exec=${pname}"
+        done
+
+        if [ -d ${appimageContents}/usr/share/icons ]; then
+          mkdir -p $out/share
+          cp -r ${appimageContents}/usr/share/icons $out/share/
+        fi
+      '';
+
+      meta = {
+        inherit description homepage changelog;
+        license = lib.licenses.gpl3Plus;
+        mainProgram = pname;
+        platforms = [ "x86_64-linux" ];
+        sourceProvenance = [ lib.sourceTypes.binaryNativeCode ];
+      };
+    };
 in
-appimageTools.wrapType2 {
-  inherit pname version src;
+{
+  orchid =
+    let
+      version = "0.9.3";
+    in
+    mkEmulator {
+      pname = "orchid";
+      inherit version;
+      src = fetchurl {
+        url = "https://github.com/MythosOfs/Orchid/releases/download/v${version}/orchid-v${version}-linux-x86_64-pgo.AppImage";
+        hash = "sha256-YCrHLIiC7cOgcA9+ZazES0PX07FolhxVCGPE5y3dw+E=";
+      };
+      description = "Experimental Nintendo Switch 2 emulator (PGO AppImage build)";
+      homepage = "https://github.com/MythosOfs/Orchid";
+      changelog = "https://github.com/MythosOfs/Orchid/releases/tag/v${version}";
+    };
 
-  # The AppImage bundles its libraries but uses the host Vulkan loader.
-  extraPkgs = pkgs: with pkgs; [
-    vulkan-loader
-    libgpg-error
-    libgcrypt
-    libselinux
-    libdrm
-    libGL
-    libxkbcommon
-    wayland
-    alsa-lib
-    libpulseaudio
-    pipewire
-    dbus
-    fontconfig
-    freetype
-    harfbuzz
-    glib
-    zlib
-    openssl
-    systemdLibs
-    stdenv.cc.cc.lib
-  ];
-  # Install desktop entry and icons from the AppImage, if it ships them.
-  extraInstallCommands = ''
-    for desktop in ${appimageContents}/*.desktop; do
-      [ -e "$desktop" ] || continue
-      install -Dm444 "$desktop" "$out/share/applications/$(basename "$desktop")"
-      substituteInPlace "$out/share/applications/$(basename "$desktop")" \
-        --replace-quiet "Exec=AppRun" "Exec=${pname}" \
-        --replace-quiet "Exec=orchid" "Exec=${pname}"
-    done
-
-    if [ -d ${appimageContents}/usr/share/icons ]; then
-      mkdir -p $out/share
-      cp -r ${appimageContents}/usr/share/icons $out/share/
-    fi
-  '';
-
-  meta = {
-    description = "Experimental Nintendo Switch 2 emulator (PGO AppImage build)";
-    homepage = "https://github.com/MythosOfs/Orchid";
-    changelog = "https://github.com/MythosOfs/Orchid/releases/tag/v${version}";
-    license = lib.licenses.gpl3Plus;
-    mainProgram = "orchid";
-    platforms = [ "x86_64-linux" ];
-    sourceProvenance = [ lib.sourceTypes.binaryNativeCode ];
-  };
+  lichii =
+    let
+      build = "125";
+    in
+    mkEmulator {
+      pname = "lichii";
+      version = build;
+      src = fetchurl {
+        url = "https://github.com/zortos293/Lichii/releases/download/build-${build}/lichii-linux-x86_64-pgo.AppImage";
+        hash = "sha256-3xVDMoxEiwfMmHHnDO5EkfUXS0TJg6PjLWIjZA4/lzw=";
+      };
+      description = "Experimental Nintendo Switch 2 emulator, Lichii (PGO AppImage build)";
+      homepage = "https://github.com/zortos293/Lichii";
+      changelog = "https://github.com/zortos293/Lichii/releases/tag/build-${build}";
+    };
 }

@@ -1,5 +1,5 @@
 {
-  description = "Orchid, an experimental Nintendo Switch 2 emulator (PGO AppImage)";
+  description = "Switch 2 emulators (Orchid, Lichii) packaged from their PGO AppImages";
 
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
@@ -8,20 +8,29 @@
     let
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
+      emulators = pkgs.callPackage ./package.nix { };
     in
     {
       packages.${system} = {
-        orchid = pkgs.callPackage ./package.nix { };
-        default = self.packages.${system}.orchid;
+        inherit (emulators) orchid lichii;
+        default = emulators.orchid;
       };
 
-      apps.${system}.default = {
-        type = "app";
-        program = "${self.packages.${system}.orchid}/bin/orchid";
+      apps.${system} = {
+        orchid = {
+          type = "app";
+          program = "${emulators.orchid}/bin/orchid";
+        };
+        lichii = {
+          type = "app";
+          program = "${emulators.lichii}/bin/lichii";
+        };
+        default = self.apps.${system}.orchid;
       };
 
+      # Adds pkgs.orchid and pkgs.lichii
       overlays.default = final: _prev: {
-        orchid = final.callPackage ./package.nix { };
+        inherit (final.callPackage ./package.nix { }) orchid lichii;
       };
     };
 }
