@@ -95,7 +95,7 @@ in
 
   lichii =
     let
-      build = "150";
+      build = "160";
     in
     mkEmulator {
       pname = "lichii";
